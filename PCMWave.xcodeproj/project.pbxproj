@@ -10,23 +10,10 @@
 		F69F58AC2EF16EE5006AE511 /* PCMWave.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PCMWave.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		F69F58BE2EF16EE7006AE511 /* Exceptions for "PCMWave" folder in "PCMWave" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = F69F58AB2EF16EE5006AE511 /* PCMWave */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		F69F58AE2EF16EE5006AE511 /* PCMWave */ = {
+		F69F58CA2EF16F24006AE511 /* AudioDance */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				F69F58BE2EF16EE7006AE511 /* Exceptions for "PCMWave" folder in "PCMWave" target */,
-			);
-			path = PCMWave;
+			path = AudioDance;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -45,8 +32,8 @@
 		F69F58A32EF16EE5006AE511 = {
 			isa = PBXGroup;
 			children = (
-				F69F58AE2EF16EE5006AE511 /* PCMWave */,
 				F69F58AD2EF16EE5006AE511 /* Products */,
+				F69F58CA2EF16F24006AE511 /* AudioDance */,
 			);
 			sourceTree = "<group>";
 		};
@@ -74,7 +61,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				F69F58AE2EF16EE5006AE511 /* PCMWave */,
+				F69F58CA2EF16F24006AE511 /* AudioDance */,
 			);
 			name = PCMWave;
 			packageProductDependencies = (
