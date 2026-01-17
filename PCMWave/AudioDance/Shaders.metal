@@ -213,8 +213,7 @@ float easeOutAudioWaveformDown(float t) {
 }
 
 // 动画进度
-float animationProgress(constant AnimationTimeUniform& animationTime,
-                        float amplitude,bool isUP){
+float animationProgress(constant AnimationTimeUniform& animationTime,bool isUP){
     
     float timePro = (animationTime.currentTime - animationTime.startTime) / animationTime.totalDuration; // time (0 ~ 1)
     timePro =  CLAMP01(timePro);
@@ -253,7 +252,7 @@ kernel void compute_peak_kernel(constant AudioPCMBufferUniforms& pcmBuffer    [[
     sharePeak.targetAmplitude[modelID] = amplitude * 1.0;// targetAmplitude 1/44s 不变和 oldAmplitude 的变动频率一致
     
     bool isUP = amplitude > sharePeak.oldAmplitude[modelID]; // 比上一次高 就是上升动画
-    float animationPro = animationProgress(computeUniforms.animationTime,amplitude,isUP);// 计算动画进度
+    float animationPro = animationProgress(computeUniforms.animationTime,isUP);// 计算动画进度
     sharePeak.animationPros[modelID] = animationPro; // 动画时间进度
 }
 
