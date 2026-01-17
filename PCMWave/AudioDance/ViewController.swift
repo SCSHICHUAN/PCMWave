@@ -115,8 +115,8 @@ extension ViewController {
             case 1002: camera.processKeyboard(.backward, deltaTime: moveSpeed)
             case 1003: camera.processKeyboard(.left, deltaTime: moveSpeed)
             case 1004: camera.processKeyboard(.right, deltaTime: moveSpeed)
-            case 1005: camera.processMouseMovement(xOffset: -rotateSpeed, yOffset: 0)
-            case 1006: camera.processMouseMovement(xOffset: rotateSpeed, yOffset: 0)
+            case 1005: waveView.angle += 0.05
+            case 1006: waveView.angle -= 0.05
             case 1007: camera.processMouseScroll(scrollSpeed)
             case 1008: camera.processMouseScroll(-scrollSpeed)
             default: break

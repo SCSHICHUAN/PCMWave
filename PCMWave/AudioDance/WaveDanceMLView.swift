@@ -86,6 +86,7 @@ public class WaveDanceMLView: MTKView {
     private var frequencyCount: Float = 0
     private var viewAllCount = 4096
     public var maxCenterStretch: Float = 50.0
+    public var angle:Float = 0.0
 
     // MARK: - 数据存储
     private var capsuleVertexBuffer: MTLBuffer? // GPU私有顶点缓冲区（仅1份，buffer 0)
@@ -443,7 +444,7 @@ public class WaveDanceMLView: MTKView {
         renderEncoder.setRenderPipelineState(metalPipelineState)
 
         var model = float4x4.identity()
-        model = model * float4x4.rotate(angle: 0, axis: SIMD3<Float>(0, 1, 0))
+        model = model * float4x4.rotate(angle: angle, axis: SIMD3<Float>(0, 1, 0))
 
         // 1. 绑定顶点缓冲区   （buffer 0)
         renderEncoder.setVertexBuffer(capsuleVertexBuffer, offset: 0, index: 0)
