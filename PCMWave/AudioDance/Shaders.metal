@@ -237,7 +237,7 @@ float animationProgress(constant AnimationTimeUniform& animationTime,
      1/44s                     1/60s                   1/44s
  oldAmplitude ============> animationPros - - - - > targetAmplitude
  */
-// 计算着色器 1/44 动画的事实进度 开始->目标高度
+// 计算着色器 1/60 动画的事实进度 开始->目标高度
 kernel void compute_peak_kernel(constant AudioPCMBufferUniforms& pcmBuffer    [[buffer(3)]],
                                 device   AnimationProsBuffer& sharePeak       [[buffer(4)]], // 共享
                                 constant ComputeUniforms& computeUniforms     [[buffer(5)]],
@@ -279,7 +279,7 @@ kernel void compute_old_peak_kernel(device   AnimationProsBuffer& sharePeak  [[b
 
 
 
-// 顶点着色器
+// 顶点着色器 1/60
 vertex VertexOut vertex_main(VertexIn in [[stage_in]],
                              constant MainVertexUniforms& mainVertexUniforms [[buffer(2)]],
                              constant AnimationProsBuffer& animationProsBuffer [[buffer(4)]] // 共享
