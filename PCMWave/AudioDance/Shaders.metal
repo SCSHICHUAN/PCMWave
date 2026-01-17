@@ -40,17 +40,23 @@ struct VertexIn {
     }
 };
 
-// 实例峰值缓冲区 CPU/GPU
+    
+/*
+    Private    仅 GPU 显存    CPU 不可访问，GPU 高速访问    速度最快，但数据无法共享
+    Managed    CPU 内存 + GPU 显存    CPU/GPU 都可访问，需手动同步    数据会拷贝，有延迟
+    Shared     统一内存（UM）    CPU/GPU 实时读写同一块内存    无拷贝、无延迟，适合实时共享
+*/
+// 实例峰值缓冲区 CPU/GPU , CPU把PCM直接拷贝到共享缓存中,在CPU和着色器之间互相读取和计算
 struct AnimationProsBuffer {
-    float animationPros[max_view_count];
-    float targetAmplitude[max_view_count];
-    float oldAmplitude[max_view_count];
-    bool  isInitialized[max_view_count];
+    float animationPros[max_view_count];   // 当前动画的进度
+    float targetAmplitude[max_view_count]; // 目标峰值
+    float oldAmplitude[max_view_count];    // 老的峰值
+    bool  isInitialized[max_view_count];   // 是否已经初始化
 };
 struct AnimationTimeUniform {
-    float startTime;
-    float currentTime;
-    float totalDuration;
+    float startTime;    // 开始时间
+    float currentTime;  // 当前时间
+    float totalDuration; // 这次动画总时间
 };
 // ComputeUniforms（buffer 2）
 struct ComputeUniforms {
@@ -223,7 +229,15 @@ float animationProgress(constant AnimationTimeUniform& animationTime,
     return animatedPro;
 }
 
-// 计算着色器 1/60
+/*
+  animationPros   当前进度
+  targetAmplitude 1/44s 不变
+  oldAmplitude    1/44s 不变
+ 
+     1/44s                     1/60s                   1/44s
+ oldAmplitude ============> animationPros - - - - > targetAmplitude
+ */
+// 计算着色器 1/44 动画的事实进度 开始->目标高度
 kernel void compute_peak_kernel(constant AudioPCMBufferUniforms& pcmBuffer    [[buffer(3)]],
                                 device   AnimationProsBuffer& sharePeak       [[buffer(4)]], // 共享
                                 constant ComputeUniforms& computeUniforms     [[buffer(5)]],
@@ -234,9 +248,9 @@ kernel void compute_peak_kernel(constant AudioPCMBufferUniforms& pcmBuffer    [[
      多个顶点对应一个model，一个模型只对应一个向量变换
      */
     int modelID = thread_index;
-    // 动画目标峰值0.25更新一次p和cm同步
+    // 由于PCM是 1/44s 跟新一次 amplitude 在 1/44s 内 amplitude不变
     float amplitude =  normalizationPcmData(pcmBuffer, computeUniforms.pcmFormat, modelID,computeUniforms.modelAllCount);
-    sharePeak.targetAmplitude[modelID] = amplitude * 1.0;
+    sharePeak.targetAmplitude[modelID] = amplitude * 1.0;// targetAmplitude 1/44s 不变和 oldAmplitude 的变动频率一致
     
     bool isUP = amplitude > sharePeak.oldAmplitude[modelID]; // 比上一次高 就是上升动画
     float animationPro = animationProgress(computeUniforms.animationTime,amplitude,isUP);// 计算动画进度
@@ -244,7 +258,7 @@ kernel void compute_peak_kernel(constant AudioPCMBufferUniforms& pcmBuffer    [[
 }
 
 
-// 计算着色器  0.25 更新一次
+// 计算着色器  1/44  更新一次,计算峰值
 kernel void compute_old_peak_kernel(device   AnimationProsBuffer& sharePeak  [[buffer(4)]], // 共享
                                     uint thread_index [[thread_position_in_grid]]
                                     ) {
@@ -275,6 +289,7 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
     float oldAmplitude = animationProsBuffer.oldAmplitude[in.modelID];
     float animationPros = animationProsBuffer.animationPros[in.modelID];
     float targetAmplitude = animationProsBuffer.targetAmplitude[in.modelID];
+    // 计算顶点的偏量
     float4 localPos = getCapsuleCenterOnlyStretch(in.position,oldAmplitude,animationPros,targetAmplitude,mainVertexUniforms.maxCenterStretch);
     //  实例矩阵变换   =   变换矩阵   *  模型矩阵
     float4 worldPos = in.transformMatrix()  * localPos;

@@ -176,7 +176,7 @@ public class WaveDanceMLView: MTKView {
         enableSetNeedsDisplay = false
         isPaused = false
         delegate = self
-        preferredFramesPerSecond = 60
+        preferredFramesPerSecond = 60  //主渲染管线的频率
 
         // 初始化命令队列（用于拷贝数据到私有缓冲区)
         metalCommandQueue = device.makeCommandQueue()
@@ -359,9 +359,9 @@ public class WaveDanceMLView: MTKView {
         }
     }
 
-    // MARK: - 执行计算着色器 0.25
+    // MARK: - 执行计算着色器  1/44 s
     private func runComputeOldShader() {
-        guard let computeOldPeakPipelineState,
+        guard let computeOldPeakPipelineState = self.computeOldPeakPipelineState,
               let commandBuffer = metalCommandQueue?.makeCommandBuffer(),
               let computeEncoder = commandBuffer.makeComputeCommandEncoder() else { return }
 
@@ -388,9 +388,9 @@ public class WaveDanceMLView: MTKView {
         commandBuffer.waitUntilCompleted()
     }
 
-    // MARK: - 执行计算着色器 1/44
+    // MARK: - 执行计算着色器 1/60 在主渲染管线前计算动画进度
     private func runComputeShader() {
-        guard let computePipelineState,
+        guard let computePipelineState = self.computePipelineState,
               let device,
               let commandBuffer = metalCommandQueue?.makeCommandBuffer(),
               let computeEncoder = commandBuffer.makeComputeCommandEncoder() else { return }
@@ -437,9 +437,9 @@ public class WaveDanceMLView: MTKView {
         commandBuffer.waitUntilCompleted()
     }
 
-    // MARK: - 实时绘制绘制1/60s
+    // MARK: - 实时绘制绘制1/60s 主渲染管线
     private func drawInstances(renderEncoder: MTLRenderCommandEncoder) {
-        guard let metalPipelineState else { return }
+        guard let metalPipelineState = self.metalPipelineState else { return }
         renderEncoder.setRenderPipelineState(metalPipelineState)
 
         var model = float4x4.identity()
@@ -472,7 +472,7 @@ public class WaveDanceMLView: MTKView {
         setNeedsDisplay()
     }
 
-    // MARK: - 不定时的跟新 1/44 s
+    // MARK: - 不定时的跟新 1/44 s 计算的频率和pcm跟新的频率一样,开始新的动画,添入新的峰值,跟新老的峰值,
     public func pushPCMtoGPU(buffer: AVAudioPCMBuffer, count: Int) {
 //        if count > 1024 {
 //            return
@@ -502,7 +502,7 @@ public class WaveDanceMLView: MTKView {
         }
         self.gpuCommonFormat = pushAudioFormat
 
-        // 3. 拷贝音频数共享缓存区
+        // 3. 拷贝音频数共享缓存区 ==== 音频数据入口
         gpuPCMBuffer.contents().copyMemory(from: srcPtr, byteCount: bytesToCopy)
         self.animationStartTime = Float(CACurrentMediaTime()) // 动画开始时间
     }
